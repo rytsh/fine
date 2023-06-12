@@ -38,6 +38,10 @@ var rootCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := cmd.Context()
 
+		if v := os.Getenv("CONFIG_FILE"); v != "" {
+			config.File = v
+		}
+
 		// load configuration
 		overrideValues := make(map[string]config.OverrideHold)
 		override(overrideValues)

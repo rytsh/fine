@@ -4,7 +4,7 @@ Rest-API file management service.
 
 ## Usage
 
-Add configuration file and give CONFIG_FILE to your environment variables. Default is `config.yaml` in the current directory.
+Add configuration file and give `CONFIG_FILE` to your environment variables. Default is `config.yaml` in the current directory.
 
 Configuration file could be json, yaml or toml.
 
