@@ -1,0 +1,104 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+project_name: fine
+
+release:
+  header: |
+    Get the latest release with brew or binary:
+
+    ```sh
+    # brew tap brew-tools/tap
+    brew install fine
+    # or binary download
+    curl -fsSL https://github.com/rytsh/fine/releases/latest/download/fine_Linux_x86_64.tar.gz | tar -xz --overwrite -C ~/bin/ fine
+    ```
+  footer: |
+    **Full Changelog**: https://github.com/rytsh/fine/compare/{{ .PreviousTag }}...{{ .Tag }}
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    # - go mod tidy
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    main: ./cmd/fine
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.ShortCommit}} -X main.date={{.Date}}
+    flags:
+      - -trimpath
+archives:
+  - name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+checksum:
+  name_template: '{{ .ProjectName }}-{{ .Version }}-checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+    - '^test:'
+    - '^chore'
+    - 'merge conflict'
+    - Merge pull request
+    - Merge remote-tracking branch
+    - Merge branch
+    - go mod tidy
+  groups:
+    - title: Dependency updates
+      regexp: "^.*feat\\(deps\\)*:+.*$"
+      order: 300
+    - title: 'New Features'
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 100
+    - title: 'Bug fixes'
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 200
+    - title: 'Documentation updates'
+      regexp: "^.*docs[(\\w)]*:+.*$"
+      order: 400
+    - title: Other work
+      order: 9999
+
+dockers:
+- image_templates:
+  - 'ghcr.io/rytsh/fine:{{ .Tag }}'
+  dockerfile: ci/Dockerfile
+  build_flag_templates:
+  - "--pull"
+  - "--label=io.artifacthub.package.readme-url=https://raw.githubusercontent.com/rytsh/fine/main/README.md"
+  - "--label=io.artifacthub.package.maintainers=[{\"name\":\"Eray Ates\",\"email\":\"eates23@gmail.com\"}]"
+  - "--label=io.artifacthub.package.license=MIT"
+  - "--label=org.opencontainers.image.description=file management service"
+  - "--label=org.opencontainers.image.created={{.Date}}"
+  - "--label=org.opencontainers.image.name={{.ProjectName}}"
+  - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+  - "--label=org.opencontainers.image.version={{.Version}}"
+  - "--label=org.opencontainers.image.source={{.GitURL}}"
+  - "--platform=linux/amd64"
+
+brews:
+- name: fine
+  homepage: https://github.com/rytsh/fine
+  description: "file management service"
+  tap:
+    owner: brew-tools
+    name: homebrew-tap
+    token: "{{ .Env.BREW_TOKEN }}"
+  folder: Formula
