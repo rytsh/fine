@@ -10,7 +10,7 @@ release:
     # brew tap brew-tools/tap
     brew install fine
     # or binary download
-    curl -fsSL https://github.com/rytsh/fine/releases/latest/download/fine_Linux_x86_64.tar.gz | tar -xz --overwrite -C ~/bin/ fine
+    curl -fSL https://github.com/rytsh/fine/releases/download/{{ .Tag }}/fine_Linux_x86_64.tar.gz | tar -xz --overwrite -C ~/bin/ fine
     ```
   footer: |
     **Full Changelog**: https://github.com/rytsh/fine/compare/{{ .PreviousTag }}...{{ .Tag }}

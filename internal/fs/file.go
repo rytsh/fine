@@ -30,11 +30,12 @@ func IsExist(path string) bool {
 	return true
 }
 
-func Delete(path string) error {
-	// delete file
-	if err := os.Remove(AddPath(path)); err != nil {
-		return err
+func Delete(path string, force bool) error {
+	// delete directory
+	if force {
+		return os.RemoveAll(AddPath(path))
 	}
 
-	return nil
+	// delete file
+	return os.Remove(AddPath(path))
 }

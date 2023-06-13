@@ -112,7 +112,7 @@ func fine(ctx context.Context) (err error) {
 	}()
 
 	// start service
-	log.Info().Msg("starting service")
+	log.Info().Msgf("starting service with base_path %q", config.App.Server.BasePath)
 
 	server.Start()
 

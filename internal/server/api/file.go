@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
@@ -14,7 +15,7 @@ import (
 //
 // @Summary     Get File
 // @Description Get File
-// @Param       path query string false "file path in server"
+// @Param       path query string true "file path in server"
 // @Router      /file [get]
 // @Tags		file
 // @Success     200 {file}   binary
@@ -37,13 +38,18 @@ func fileGet(c echo.Context) error {
 // @Accept      multipart/form-data
 // @Produce		json
 // @Param       file formData file true "this is a test file"
-// @Param       path query string false "file path in server"
+// @Param       path query string true "file path in server"
 // @Router      /file [put]
 // @Tags		file
 // @Success     200 {object} msg.WebApiSuccess{}
 // @Failure     400 {object} msg.WebApiError{}
 // @Failure     500 {object} msg.WebApiError{}
 func filePut(c echo.Context) error {
+	filePath := c.QueryParam("path")
+	if filePath == "" {
+		return c.JSON(http.StatusBadRequest, msg.WebApiError{Err: "path is required"})
+	}
+
 	file, err := c.FormFile("file")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, msg.WebApiError{Err: err.Error()})
@@ -56,11 +62,11 @@ func filePut(c echo.Context) error {
 	}
 	defer src.Close()
 
-	if err := fs.Save(file.Filename, src); err != nil {
+	if err := fs.Save(filePath, src); err != nil {
 		return c.JSON(http.StatusBadRequest, msg.WebApiError{Err: err.Error()})
 	}
 
-	message := fmt.Sprintf("file %s transfered/updated", file.Filename)
+	message := fmt.Sprintf("file [%s] transfered/updated to [%s]", file.Filename, filePath)
 
 	log.Info().Msg(message)
 
@@ -74,7 +80,7 @@ func filePut(c echo.Context) error {
 // @Accept      multipart/form-data
 // @Produce		json
 // @Param       file formData file true "this is a test file"
-// @Param       path query string false "file path in server"
+// @Param       path query string true "file path in server"
 // @Router      /file [post]
 // @Tags		file
 // @Success     200 {object} msg.WebApiSuccess{}
@@ -103,11 +109,11 @@ func filePost(c echo.Context) error {
 	}
 	defer src.Close()
 
-	if err := fs.Save(file.Filename, src); err != nil {
+	if err := fs.Save(filePath, src); err != nil {
 		return c.JSON(http.StatusBadRequest, msg.WebApiError{Err: err.Error()})
 	}
 
-	message := fmt.Sprintf("file [%s] transfered", file.Filename)
+	message := fmt.Sprintf("file [%s] transfered to [%s]", file.Filename, filePath)
 
 	log.Info().Msg(message)
 
@@ -117,9 +123,10 @@ func filePost(c echo.Context) error {
 // DeleteFile
 //
 // @Summary     Delete File
-// @Description Delete File
+// @Description Delete file from server by path. Delete directory with force set to true.
 // @Produce		json
-// @Param       path query string false "file path in server"
+// @Param       path query string true "file path in server"
+// @Param       force query boolean false "force delete"
 // @Router      /file [delete]
 // @Tags		file
 // @Success     200 {object} msg.WebApiSuccess{}
@@ -129,7 +136,9 @@ func fileDelete(c echo.Context) error {
 	// get the file name from path
 	filePath := c.QueryParam("path")
 
-	if err := fs.Delete(filePath); err != nil {
+	force, _ := strconv.ParseBool(c.QueryParam("force"))
+
+	if err := fs.Delete(filePath, force); err != nil {
 		return c.JSON(http.StatusBadRequest, msg.WebApiError{Err: err.Error()})
 	}
 

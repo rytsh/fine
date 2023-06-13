@@ -17,24 +17,36 @@ export CONFIG_FILE=/path/to/config.yaml
 
 Go to swagger-ui page: http://localhost:8080/api/v1/swagger/index.html
 
-Push file
+__fine__ server automatically create folders if not exists in PUT and POST requests.
+
+#### POST
+
 ```sh
 curl -X POST -F "file=@/path/to/file" http://localhost:8080/api/v1/file?path={file_path}
 ```
 
-Push or update file
+#### PUT
+
 ```sh
 curl -X PUT -F "file=@/path/to/file" http://localhost:8080/api/v1/file?path={file_path}
 ```
 
-Get file
+#### GET
+
 ```sh
 curl -o output -X GET http://localhost:8080/api/v1/file?path={file_path}
 ```
 
-Delete file
+#### DELETE
+
 ```sh
 curl -X DELETE http://localhost:8080/api/v1/file?path={file_path}
+```
+
+When deleting a directory add `force=true` query parameter to delete recursively.
+
+```sh
+curl -X DELETE http://localhost:8080/api/v1/file?path={directory_path}&force=true
 ```
 
 ### Configuration
@@ -56,7 +68,8 @@ storage:
 ## Development
 
 <details><summary>Click here to see details...</summary>
-Generate swagger docs
+
+Generate swagger docs if you change api definitions
 
 ```sh
 make docs
